@@ -3,6 +3,7 @@ import express from 'express'
 import helmet from 'helmet'
 import { connectDatabase } from './config/database.js'
 import { getEnv } from './config/env.js'
+import { mountSwagger } from './docs/swagger.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { rejectMongoOperators } from './middleware/sanitize.js'
 import { authRouter } from './routes/authRoutes.js'
@@ -17,7 +18,19 @@ export const app = express()
 
 app.disable('x-powered-by')
 app.set('trust proxy', 1)
-app.use(helmet())
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'validator.swagger.io'],
+        connectSrc: ["'self'"],
+      },
+    },
+  }),
+)
 app.use(cors({ origin: getEnv().CLIENT_ORIGIN, credentials: false }))
 app.use(express.json({ limit: '20kb' }))
 app.use(rejectMongoOperators)
@@ -26,9 +39,17 @@ app.get('/api/health', (_request, response) => {
   response.json({ success: true, data: { status: 'ok' } })
 })
 
+// Docs before DB middleware so Swagger stays available even if Mongo is down
+mountSwagger(app)
+
 app.use(
   '/api',
   asyncHandler(async (_request, _response, next) => {
+    // Skip DB connect for static docs assets already handled above
+    if (_request.path.startsWith('/docs')) {
+      next()
+      return
+    }
     await connectDatabase()
     next()
   }),

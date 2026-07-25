@@ -1,5 +1,8 @@
 # API reference
 
+Interactive Swagger UI (recommended): **`/api/docs`**  
+OpenAPI JSON: **`/api/docs.json`** (source: `server/docs/openapi.ts`)
+
 All responses use `{ "success": true, "data": ... }`. Errors use
 `{ "success": false, "error": { "code": "...", "message": "..." } }`.
 Private endpoints require `Authorization: Bearer <JWT>`.

@@ -50,7 +50,8 @@ server/
   scripts/            seed, clear, backdate-roi helpers
 src/                  Vite React app (pages, components, lib)
 tests/                Domain / validation / idempotency tests
-docs/API.md           Full API reference
+docs/API.md           Short API reference
+server/docs/openapi.ts  OpenAPI 3 spec (Swagger source)
 vercel.json           Build, rewrites, daily ROI cron
 ```
 
@@ -117,9 +118,28 @@ Copy from `.env.example`. Never commit `.env`. Never use `VITE_` for secrets.
 | `NODE_ENV` | No | `development` \| `test` \| `production` |
 | `PORT` | No | Local API port (default `3000`) |
 
+## API documentation (Swagger)
+
+With the API running (`npm run dev:api`):
+
+| Resource | URL |
+| --- | --- |
+| Interactive Swagger UI | [http://127.0.0.1:3000/api/docs](http://127.0.0.1:3000/api/docs) |
+| OpenAPI JSON | [http://127.0.0.1:3000/api/docs.json](http://127.0.0.1:3000/api/docs.json) |
+| Via Vite proxy | [http://localhost:5173/api/docs](http://localhost:5173/api/docs) |
+
+How to use:
+
+1. Open Swagger UI  
+2. Try **Auth → Register** or **Login**  
+3. Copy `data.token` from the response  
+4. Click **Authorize**, paste the JWT, then call protected routes  
+
+Edit `server/docs/openapi.ts` whenever you add or change endpoints — that file is the single source for Swagger.
+
 ## API overview
 
-Full reference: [docs/API.md](docs/API.md).
+Short markdown reference: [docs/API.md](docs/API.md).
 
 | Method | Path | Auth | Description |
 | --- | --- | --- | --- |
@@ -187,7 +207,7 @@ Project → **Settings** → **Environment Variables** → add for **Production*
 | `JWT_SECRET` | Long random string (≥ 32 chars) |
 | `JWT_EXPIRES_IN` | `7d` |
 | `CRON_SECRET` | Different long random string (≥ 24 chars) |
-| `CLIENT_ORIGIN` | Your Vercel URL, e.g. `https://nexavest.vercel.app` |
+| `CLIENT_ORIGIN` | Your Vercel URL, e.g. `https://assesment-six-chi.vercel.app` |
 | `NODE_ENV` | `production` |
 
 Generate secrets locally if needed:
